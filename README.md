@@ -2,19 +2,17 @@
 [![Crates.io](https://img.shields.io/crates/v/axum-server)](https://crates.io/crates/axum-server)
 [![Docs](https://img.shields.io/crates/v/axum-server?color=blue&label=docs)](https://docs.rs/axum-server/)
 
-# axum-server
+# axum-serveplus
 
-axum-server is a [hyper] server implementation designed to be used with [axum] framework.
-
-This project is maintained by community independently from [axum].
+`axum-serveplus` is a fork of the [`axum-server`](https://github.com/programatik29/axum-server) project. It is a hyper server implementation designed to be used with the `axum` framework. This fork aims to continue the development and maintenance of the original project, ensuring compatibility with future `axum` releases and providing high performance and security features.
 
 ## Features
 
 - HTTP/1 and HTTP/2
-- HTTPS through [rustls].
-- High performance through [hyper].
-- Using [tower] make service API.
-- Very good [axum] compatibility. Likely to work with future [axum] releases.
+- HTTPS through `rustls`
+- High performance through `hyper`
+- Using `tower` make service API
+- Very good `axum` compatibility. Likely to work with future `axum` releases.
 
 ## Usage Example
 
@@ -30,7 +28,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     println!("listening on {}", addr);
-    axum_server::bind(addr)
+    axum_serveplus::bind(addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
@@ -41,7 +39,7 @@ You can find more examples [here](/examples).
 
 ## Minimum Supported Rust Version
 
-axum-server's MSRV is `1.63`.
+`axum-serveplus`'s MSRV is 1.63.
 
 ## Safety
 
@@ -49,9 +47,4 @@ This crate uses `#![forbid(unsafe_code)]` to ensure everything is implemented in
 
 ## License
 
-This project is licensed under the [MIT license](LICENSE).
-
-[axum]: https://crates.io/crates/axum
-[hyper]: https://crates.io/crates/hyper
-[rustls]: https://crates.io/crates/rustls
-[tower]: https://crates.io/crates/tower
+This project is licensed under the MIT license.
