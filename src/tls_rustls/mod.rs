@@ -354,9 +354,11 @@ async fn config_from_pem_chain_file(
 #[cfg(test)]
 mod tests {
     use crate::handle::Handle;
+    use crate::server::tests::slow_body;
     use crate::tls_rustls::{self, RustlsConfig};
     use axum::body::Body;
-    use axum::routing::get;
+    use axum::response::Response;
+    use axum::routing::{get, post};
     use axum::Router;
     use bytes::Bytes;
     use http::{response, Request};
@@ -368,6 +370,7 @@ mod tests {
     use rustls_pki_types::{CertificateDer, ServerName, UnixTime};
     use std::fmt::Debug;
     use std::{convert::TryFrom, io, net::SocketAddr, sync::Arc, time::Duration};
+    use tokio::sync::oneshot;
     use tokio::time::sleep;
     use tokio::{net::TcpStream, task::JoinHandle, time::timeout};
     use tokio_rustls::TlsConnector;
@@ -473,52 +476,65 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_graceful_shutdown() {
+    async fn test_graceful_shutdown_timeout() {
         let (handle, server_task, addr) = start_server().await;
 
-        let (mut client, conn) = connect(addr).await;
+        let (mut client1, _conn1) = connect(addr).await;
+        let (mut client2, _conn2) = connect(addr).await;
 
-        handle.graceful_shutdown(None);
-
-        let (_parts, body) = send_empty_request(&mut client).await;
-
-        assert_eq!(body.as_ref(), b"Hello, world!");
-
-        // Disconnect client.
-        conn.abort();
-
-        // Server task should finish soon.
-        let server_result = timeout(Duration::from_secs(1), server_task)
+        // Clients can send request before graceful shutdown.
+        crate::server::tests::do_empty_request(&mut client1)
             .await
-            .unwrap()
+            .unwrap();
+        crate::server::tests::do_empty_request(&mut client2)
+            .await
             .unwrap();
 
-        assert!(server_result.is_ok());
-    }
+        let start = tokio::time::Instant::now();
 
-    #[ignore]
-    #[tokio::test]
-    async fn test_graceful_shutdown_timed() {
-        let (handle, server_task, addr) = start_server().await;
+        let (hdr1_tx, hdr1_rx) = oneshot::channel::<()>();
 
-        let (mut client, _conn) = connect(addr).await;
+        let task1 = async {
+            // A slow request made before graceful shutdown is handled.
+            // This one is shorter than the timeout, so it should succeed.
+            let hdr1 =
+                crate::server::tests::send_slow_request(&mut client1, Duration::from_millis(222))
+                    .await;
+            hdr1_tx.send(()).unwrap();
 
-        handle.graceful_shutdown(Some(Duration::from_millis(250)));
+            let res1 = crate::server::tests::recv_slow_response_body(hdr1.unwrap()).await;
+            res1.unwrap();
+        };
+        let task2 = async {
+            // A slow request made before graceful shutdown is handled.
+            // This one is much longer than the timeout; it should fail sometime
+            // after the graceful shutdown timeout.
 
-        let (_parts, body) = send_empty_request(&mut client).await;
+            let hdr2 =
+                crate::server::tests::send_slow_request(&mut client2, Duration::from_millis(5_555))
+                    .await;
+            hdr2.unwrap_err();
+        };
+        let task3 = async {
+            // Begin graceful shutdown after we receive response headers for (1).
+            hdr1_rx.await.unwrap();
 
-        assert_eq!(body.as_ref(), b"Hello, world!");
+            // Set a timeout on requests to finish before we drop them.
+            handle.graceful_shutdown(Some(Duration::from_millis(333)));
 
-        // Don't disconnect client.
-        // conn.abort();
+            // Server task should finish soon.
+            timeout(Duration::from_secs(1), server_task)
+                .await
+                .unwrap()
+                .unwrap()
+                .unwrap();
 
-        // Server task should finish soon.
-        let server_result = timeout(Duration::from_secs(1), server_task)
-            .await
-            .unwrap()
-            .unwrap();
+            // At this point, graceful shutdown must have occured.
+            assert!(start.elapsed() >= Duration::from_millis(222 + 333));
+            assert!(start.elapsed() <= Duration::from_millis(5_555));
+        };
 
-        assert!(server_result.is_ok());
+        tokio::join!(task1, task2, task3);
     }
 
     async fn start_server() -> (Handle, JoinHandle<io::Result<()>>, SocketAddr) {
@@ -526,7 +542,15 @@ mod tests {
 
         let server_handle = handle.clone();
         let server_task = tokio::spawn(async move {
-            let app = Router::new().route("/", get(|| async { "Hello, world!" }));
+            let app = Router::new()
+                .route("/", get(|| async { "Hello, world!" }))
+                .route(
+                    "/echo_slowly",
+                    post(|body: Bytes| async move {
+                        // Stream a response slowly, byte-by-byte, over 100ms
+                        Response::new(slow_body(body.len(), Duration::from_millis(100)))
+                    }),
+                );
 
             let config = RustlsConfig::from_pem_file(
                 "examples/self-signed-certs/cert.pem",

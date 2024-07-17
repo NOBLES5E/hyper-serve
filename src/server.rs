@@ -269,7 +269,7 @@ pub(crate) fn io_other<E: Into<BoxError>>(error: E) -> io::Error {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use crate::{handle::Handle, server::Server};
     use axum::body::Body;
     use axum::response::Response;
@@ -470,7 +470,7 @@ mod tests {
     }
 
     // Send a basic `GET /` request.
-    async fn do_empty_request(client: &mut SendRequest<Body>) -> hyper::Result<()> {
+    pub(crate) async fn do_empty_request(client: &mut SendRequest<Body>) -> hyper::Result<()> {
         client.ready().await?;
 
         let body = client
@@ -485,7 +485,7 @@ mod tests {
 
     // Send a request with a body streamed byte-by-byte, over a given duration,
     // then wait for the full response.
-    async fn do_slow_request(
+    pub(crate) async fn do_slow_request(
         client: &mut SendRequest<Body>,
         duration: Duration,
     ) -> hyper::Result<()> {
@@ -493,7 +493,7 @@ mod tests {
         recv_slow_response_body(response).await
     }
 
-    async fn send_slow_request(
+    pub(crate) async fn send_slow_request(
         client: &mut SendRequest<Body>,
         duration: Duration,
     ) -> hyper::Result<http::Response<hyper::body::Incoming>> {
@@ -506,7 +506,7 @@ mod tests {
         client.send_request(req).await
     }
 
-    async fn recv_slow_response_body(
+    pub(crate) async fn recv_slow_response_body(
         response: http::Response<hyper::body::Incoming>,
     ) -> hyper::Result<()> {
         let resp_body = response.into_body();
@@ -518,7 +518,7 @@ mod tests {
     // A stream of n response data `Frame`s, where n = `length`, and each frame
     // consists of a single byte. The whole response is smeared out over
     // a `duration` length of time.
-    fn slow_body(length: usize, duration: Duration) -> axum::body::Body {
+    pub(crate) fn slow_body(length: usize, duration: Duration) -> axum::body::Body {
         let frames =
             (0..length).map(move |_| Ok::<_, hyper::Error>(Frame::data(Bytes::from_static(b"X"))));
 
