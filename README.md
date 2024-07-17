@@ -1,4 +1,3 @@
-[![License](https://img.shields.io/crates/l/axum-serveplus)](https://choosealicense.com/licenses/mit/)
 [![Crates.io](https://img.shields.io/crates/v/axum-serveplus)](https://crates.io/crates/axum-serveplus)
 [![Docs](https://img.shields.io/crates/v/axum-serveplus?color=blue&label=docs)](https://docs.rs/axum-serveplus/)
 
