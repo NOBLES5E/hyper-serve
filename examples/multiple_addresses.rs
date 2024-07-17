@@ -18,7 +18,7 @@ async fn main() {
 async fn start_server(addr: SocketAddr) {
     let app = Router::new().route("/", get(|| async { "Hello, world!" }));
 
-    axum_serveplus::bind(addr)
+    hyper_serve::bind(addr)
         .serve(app.into_make_service())
         .await
         .unwrap();

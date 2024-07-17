@@ -4,7 +4,7 @@
 //!
 //! ```rust,no_run
 //! use axum::{routing::get, Router};
-//! use axum_serveplus::tls_rustls::RustlsConfig;
+//! use hyper_serve::tls_rustls::RustlsConfig;
 //! use std::net::SocketAddr;
 //!
 //! #[tokio::main]
@@ -20,7 +20,7 @@
 //!
 //!     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
 //!     println!("listening on {}", addr);
-//!     axum_serveplus::bind_rustls(addr, config)
+//!     hyper_serve::bind_rustls(addr, config)
 //!         .serve(app.into_make_service())
 //!         .await
 //!         .unwrap();

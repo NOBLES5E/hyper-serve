@@ -1,9 +1,9 @@
-[![Crates.io](https://img.shields.io/crates/v/axum-serveplus)](https://crates.io/crates/axum-serveplus)
-[![Docs](https://img.shields.io/crates/v/axum-serveplus?color=blue&label=docs)](https://docs.rs/axum-serveplus/)
+[![Crates.io](https://img.shields.io/crates/v/hyper-serve)](https://crates.io/crates/hyper-serve)
+[![Docs](https://img.shields.io/crates/v/hyper-serve?color=blue&label=docs)](https://docs.rs/hyper-serve/)
 
-# axum-serveplus
+# hyper-serve
 
-`axum-serveplus` is a fork of the [`axum-server`](https://github.com/programatik29/axum-server) project. It is a hyper server implementation designed to be used with the `axum` framework. This fork aims to continue the development and maintenance of the original project, ensuring compatibility with future `axum` releases and providing high performance and security features.
+`hyper-serve` is a fork of the [`axum-server`](https://github.com/programatik29/axum-server) project. It is a hyper server implementation designed to be used with the `axum` framework. This fork aims to continue the development and maintenance of the original project, ensuring compatibility with future `axum` releases and providing high performance and security features.
 
 ## Features
 
@@ -27,7 +27,7 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     println!("listening on {}", addr);
-    axum_serveplus::bind(addr)
+    hyper_serve::bind(addr)
         .serve(app.into_make_service())
         .await
         .unwrap();
@@ -38,7 +38,7 @@ You can find more examples [here](/examples).
 
 ## Minimum Supported Rust Version
 
-`axum-serveplus`'s MSRV is 1.63.
+`hyper-serve`'s MSRV is 1.63.
 
 ## Safety
 

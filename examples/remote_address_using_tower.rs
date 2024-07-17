@@ -17,7 +17,7 @@ async fn main() {
         Ok::<_, Infallible>(Response::new(body))
     });
 
-    axum_serveplus::bind(SocketAddr::from(([127, 0, 0, 1], 3000)))
+    hyper_serve::bind(SocketAddr::from(([127, 0, 0, 1], 3000)))
         .serve(service_fn(|addr: SocketAddr| async move {
             Ok::<_, Infallible>(AddExtension::new(service, addr))
         }))

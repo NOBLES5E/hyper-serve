@@ -1,4 +1,4 @@
-//! axum-serveplus is a [hyper] server implementation designed to be used with [axum] framework.
+//! hyper-serve is a [hyper] server implementation designed to be used with [axum] framework.
 //!
 //! # Features
 //!
@@ -10,7 +10,7 @@
 //!
 //! # Guide
 //!
-//! axum-serveplus can [`serve`] items that implement [`MakeService`] with some additional [trait
+//! hyper-serve can [`serve`] items that implement [`MakeService`] with some additional [trait
 //! bounds](crate::service::MakeServiceRef). Make services that are [created] using [`axum`]
 //! complies with those trait bounds out of the box. Therefore it is more convenient to use this
 //! crate with [`axum`].
@@ -47,7 +47,7 @@
 //!
 //!     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
 //!     println!("listening on {}", addr);
-//!     axum_serveplus::bind(addr)
+//!     hyper_serve::bind(addr)
 //!         .serve(app.into_make_service())
 //!         .await
 //!         .unwrap();
@@ -62,7 +62,7 @@
 //! [created]: https://docs.rs/axum/0.3/axum/struct.Router.html#method.into_make_service
 //! [hyper]: https://crates.io/crates/hyper
 //! [openssl]: https://crates.io/crates/openssl
-//! [repository]: https://github.com/NOBLES5E/axum-serveplus/
+//! [repository]: https://github.com/NOBLES5E/hyper-serve/
 //! [rustls]: https://crates.io/crates/rustls
 //! [tower]: https://crates.io/crates/tower
 //! [`axum`]: https://docs.rs/axum/0.3
