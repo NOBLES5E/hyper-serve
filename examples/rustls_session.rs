@@ -3,7 +3,7 @@
 //! To connect through browser, navigate to "https://localhost:3000" url.
 
 use axum::{middleware::AddExtension, routing::get, Extension, Router};
-use axum_server::{
+use axum_serveplus::{
     accept::Accept,
     tls_rustls::{RustlsAcceptor, RustlsConfig},
 };
@@ -29,7 +29,7 @@ async fn main() {
     println!("listening on {}", addr);
 
     let acceptor = CustomAcceptor::new(RustlsAcceptor::new(config));
-    let server = axum_server::bind(addr).acceptor(acceptor);
+    let server = axum_serveplus::bind(addr).acceptor(acceptor);
 
     server.serve(app.into_make_service()).await.unwrap();
 }
